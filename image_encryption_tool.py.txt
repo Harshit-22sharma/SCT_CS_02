@@ -1,0 +1,50 @@
+from PIL import Image
+import numpy as np
+
+def swap_pixels(image_array):
+    swapped_array = np.copy(image_array)
+    swapped_array = swapped_array[:, ::-1]
+    return swapped_array
+
+def add_key_to_pixels(image_array, key):
+    encrypted_array = (image_array + key) % 256
+    return encrypted_array.astype(np.uint8)
+
+def encrypt_image(input_path, output_path, key, mode='swap'):
+    image = Image.open(input_path)
+    image_array = np.array(image)
+    
+    if mode == 'swap':
+        encrypted_array = swap_pixels(image_array)
+    elif mode == 'add':
+        encrypted_array = add_key_to_pixels(image_array, key)
+    else:
+        raise ValueError("Unsupported mode. Use 'swap' or 'add'.")
+    
+    encrypted_image = Image.fromarray(encrypted_array)
+    encrypted_image.save(output_path)
+    print(f"Encrypted image saved to {output_path}")
+
+def decrypt_image(input_path, output_path, key, mode='swap'):
+    image = Image.open(input_path)
+    image_array = np.array(image)
+    
+    if mode == 'swap':
+        decrypted_array = swap_pixels(image_array)
+    elif mode == 'add':
+        decrypted_array = (image_array - key) % 256
+    else:
+        raise ValueError("Unsupported mode. Use 'swap' or 'add'.")
+    
+    decrypted_image = Image.fromarray(decrypted_array.astype(np.uint8))
+    decrypted_image.save(output_path)
+    print(f"Decrypted image saved to {output_path}")
+
+if __name__ == "__main__":
+    input_path = "input_image.png"
+    encrypted_path = "encrypted_image.png"
+    decrypted_path = "decrypted_image.png"
+    key = 50
+
+    encrypt_image(input_path, encrypted_path, key, mode='add')
+    decrypt_image(encrypted_path, decrypted_path, key, mode='add')
